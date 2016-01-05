@@ -1,0 +1,9 @@
+@import "variables";
+@import "mixins";
+
+body {
+  background: $body-bg;
+  font-family: $tk-font-family;
+  color: $text-color;
+  font-size: $font-size-base;
+}

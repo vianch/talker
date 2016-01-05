@@ -1,0 +1,40 @@
+$fa-font-path:        "../../fonts" !default;
+
+@font-face {
+    font-family: 'ralewaybold';
+    src: url('#{$fa-font-path}/raleway-bold.eot');
+    src: url('#{$fa-font-path}/raleway-bold.eot?#iefix') format('embedded-opentype'),
+         url('#{$fa-font-path}/raleway-bold.woff2') format('woff2'),
+         url('#{$fa-font-path}/raleway-bold.woff') format('woff'),
+         url('#{$fa-font-path}/raleway-bold.ttf') format('truetype'),
+         url('#{$fa-font-path}/raleway-bold.svg#ralewaybold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'ralewaylight';
+    src: url('#{$fa-font-path}/raleway-light.eot');
+    src: url('#{$fa-font-path}/raleway-light.eot?#iefix') format('embedded-opentype'),
+         url('#{$fa-font-path}/raleway-light.woff2') format('woff2'),
+         url('#{$fa-font-path}/raleway-light.woff') format('woff'),
+         url('#{$fa-font-path}/raleway-light.ttf') format('truetype'),
+         url('#{$fa-font-path}/raleway-light.svg#ralewaylight') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'Raleway';
+    src: url('#{$fa-font-path}/raleway-regular.eot');
+    src: url('#{$fa-font-path}/raleway-regular.eot?#iefix') format('embedded-opentype'),
+         url('#{$fa-font-path}/raleway-regular.woff2') format('woff2'),
+         url('#{$fa-font-path}/raleway-regular.woff') format('woff'),
+         url('#{$fa-font-path}/raleway-regular.ttf') format('truetype'),
+         url('#{$fa-font-path}/raleway-regular.svg#ralewayregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}

@@ -1,0 +1,50 @@
+{
+  "name": "talker",
+  "version": "1.0.0",
+  "description": "talker is a chat board",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vianch/talker.git"
+  },
+  "keywords": [
+    "talker",
+    "chat",
+    "board"
+  ],
+  "author": "VIANCH ideasdigitally.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vianch/talker/issues"
+  },
+  "homepage": "https://github.com/vianch/talker#readme",
+  "dependencies": {
+    "angular2": "^2.0.0-beta.0",
+    "es6-promise": "^3.0.2",
+    "es6-shim": "^0.34.0",
+    "es7-reflect-metadata": "^1.4.0",
+    "reflect-metadata": "^0.1.2",
+    "rxjs": "^5.0.0-beta.0",
+    "toastr": "^2.1.2",
+    "zone.js": "^0.5.10"
+  },
+  "devDependencies": {
+    "autoprefixer-loader": "^3.1.0",
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "html-loader": "^0.4.0",
+    "node-sass": "^3.4.2",
+    "sass-loader": "^3.1.2",
+    "style-loader": "^0.13.0",
+    "ts-loader": "^0.7.2",
+    "tslint": "^3.2.1",
+    "tslint-loader": "^2.1.0",
+    "typescript": "^1.7.5",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}
