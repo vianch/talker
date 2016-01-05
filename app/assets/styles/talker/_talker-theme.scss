@@ -1,0 +1,31 @@
+@import "variables";
+@import "mixins";
+
+.talker {
+	$shadow:  -3px 0px 5px 1px rgba(34,34,34,0.9);
+	height: 100%;
+
+	.tk-box {
+		margin: 0;
+		height: 100%;
+	}
+	.tk-chat-icons {
+		background: $tk-first-color;
+	}
+	.tk-inbox {
+		background: $tk-second-color;
+		@include box-shadow($shadow);
+	}
+	.tk-user-list {
+		background: $tk-third-color;
+		@include box-shadow($shadow);
+	}
+	.tk-chat-wrapper {
+		background: $tk-fourth-color;
+	}
+	.tk-contact-info {
+		background: $body-bg;
+	}
+}
+
+@import "queries"; 

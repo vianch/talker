@@ -1,27 +1,33 @@
 //== FONTS
-$tk-font-family:  "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$tk-font-family  : "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-$font-size-base:          14px !default;
-$font-size-large:         ceil(($font-size-base * 1.25)) !default; // ~18px
-$font-size-small:         ceil(($font-size-base * 0.85)) !default; // ~12px
-
+$font-size-base  : 14px !default;
+$font-size-large : ceil(($font-size-base * 1.25)) !default; // ~18px
+$font-size-small : ceil(($font-size-base * 0.85)) !default; // ~12px
 
 //== Colors
+$gray-base       : #000 !default;
+$gray-darker     : lighten($gray-base, 13.5%) !default; // #222
+$gray-dark       : lighten($gray-base, 20%) !default;   // #333
+$gray            : lighten($gray-base, 33.5%) !default; // #555
+$gray-light      : lighten($gray-base, 46.7%) !default; // #777
+$gray-lighter    : lighten($gray-base, 93.5%) !default; // #eee
 
-$gray-base:              #000 !default;
-$gray-darker:            lighten($gray-base, 13.5%) !default; // #222
-$gray-dark:              lighten($gray-base, 20%) !default;   // #333
-$gray:                   lighten($gray-base, 33.5%) !default; // #555
-$gray-light:             lighten($gray-base, 46.7%) !default; // #777
-$gray-lighter:           lighten($gray-base, 93.5%) !default; // #eee
+$tk-first-color  : #1d232a!default; // #337ab7
+$tk-second-color : #1e242b!default; // #337ab7
+$tk-third-color  : #242a31!default; // #337ab7
+$tk-fourth-color : #eaecf1!default; // #337ab7
+$tk-fourth-color : #fbfcfc!default; // #337ab7
 
-$brand-primary:         darken(#428bca, 6.5%) !default; // #337ab7
-$brand-success:         #5cb85c !default;
-$brand-info:            #5bc0de !default;
-$brand-warning:         #f0ad4e !default;
-$brand-danger:          #d9534f !default;
+$tk-blue         : #0084ff;
+$tk-green        : #2dc100;
+
+$tk-success      : #5cb85c !default;
+$tk-info         : #5bc0de !default;
+$tk-warning      : #f0ad4e !default;
+$tk-danger       : #d9534f !default;
 
 //** Background color for `<body>`.
-$body-bg:               #fff !default;
+$body-bg         : #ffffff !default;
 //** Global text color on `<body>`.
-$text-color:            $gray-dark !default;
+$text-color      : $gray-dark !default;
