@@ -1,0 +1,29 @@
+@import "variables";
+@import "mixins";
+
+// FORMS
+
+.tk-search-user {
+	background: $tk-hover-color;
+	padding: 12px;
+    height: 40px;
+	@include border-radius(25px);
+
+	&:before {
+		font-family: fontAwesome;
+		content: '\f002  ';
+		color: $white-color;
+		position: absolute;
+		z-index: 3;
+	}
+
+	input {
+		width: 90%;
+		height: 15px;
+		padding-left: 17px;
+		background: $tk-hover-color;
+		color: $gray-lighter;
+		@include font-size(13px);
+	}
+}
+

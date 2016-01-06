@@ -2,7 +2,8 @@
 @import "mixins";
 
 .talker {
-	$shadow:  -3px 0px 5px 1px rgba(34,34,34,0.9);
+	$shadow:  -2px 0px 1px 1px rgba(34,34,34,0.9);
+	$header-size: 80px;
 	height: 100%;
 
 	.tk-box {
@@ -22,10 +23,84 @@
 	}
 	.tk-chat-wrapper {
 		background: $tk-fourth-color;
+		@include box-shadow($shadow);
 	}
 	.tk-contact-info {
-		background: $body-bg;
+		background: $white-color;
+	}
+
+	.tk-inbox-header {
+		height: $header-size;
+		display: flex;
+		flex-flow: row nowrap;
+		color: $white-color;
+		h1 {
+			font-family: "ralewaybold", sans-serif;
+			@include font-size(22px);
+
+			margin-left: 25px;
+		}
+
+		.tk-add-friend-button {
+
+		}
+	}
+
+	.tk-search-user-wrapper {
+		padding: 20px 25px;
+		border-bottom: 1px solid $gray;
+	}
+
+	.tk-chat-actions-header{
+		  height: $header-size;
+		  border-bottom: 1px solid $gray-chat-border;
+		  display: flex;
+		  flex-flow: row nowrap;
+		  justify-content: space-around;
+		  align-items: stretch;
+	}
+
+	.tk-action-wrapper {
+		@include font-size(13px);
+		border-left: 1px solid $gray-chat-border;
+		flex-grow: 1;
+		text-align: center;
+		line-height: $header-size;
+		cursor: pointer;
+
+		&:first-child {
+			border-left: 0;
+			align-self: center;
+			line-height: inherit;
+			flex-grow: 2;
+			cursor: auto;
+		}
+
+		&:hover {
+			.tk-mark-favorite {
+				color: $tk-yellow;
+			}
+			.tk-videocall {
+				color: $tk-blue;
+			}
+			.tk-call {
+				color: $tk-green;
+			}
+		}
+	
+		.tk-username {
+			font-family: "ralewaybold", sans-serif;
+			color: $gray-darker;
+		}
+
+		.tk-action-icon {
+			color: $gray-light;
+			@include font-size(20px);
+		}
+
+		
 	}
 }
 
+@import "forms"; 
 @import "queries"; 

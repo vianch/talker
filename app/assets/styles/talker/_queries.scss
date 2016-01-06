@@ -8,7 +8,7 @@
 
 /* Larger than phablet (also point when grid becomes active) */
 @media (min-width: 550px) {
-	.u-full-width {
+	.u-full-width.tk-absolute {
 		@include set-position(absolute,0,0);
 		height: 100%;
 	}

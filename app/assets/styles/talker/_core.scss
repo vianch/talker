@@ -7,3 +7,12 @@ body {
   color: $text-color;
   font-size: $font-size-base;
 }
+
+input, input:hover, input:focus, input:active textarea {
+	border: 0;
+	outline: 0;
+}
+
+.hide {
+	display: none;
+}
