@@ -155,6 +155,16 @@
 		  	float: right;
 		  }
 	}
+
+	.tk-chat {
+
+		.tk-chat-write-wrapper {
+			@include set-position(absolute,auto,auto,0,0);
+			@include set-size(100%, $header-size, true);
+			background: $white-color;
+			display: none;
+		}
+	}
 }
 
 @import "forms"; 
