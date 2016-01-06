@@ -16,3 +16,9 @@ input, input:hover, input:focus, input:active textarea {
 .hide {
 	display: none;
 }
+
+.tk-cicle {
+	@include circle(36px);
+	text-align: center;
+	line-height: 36px;
+}

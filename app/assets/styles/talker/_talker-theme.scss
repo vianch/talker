@@ -5,44 +5,79 @@
 	$shadow:  -2px 0px 1px 1px rgba(34,34,34,0.9);
 	$header-size: 80px;
 	height: 100%;
-
+		display: flex;
+		flex-flow: row nowrap;
+		justify-content: space-around;
 	.tk-box {
-		margin: 0;
 		height: 100%;
+		display: block;
 	}
+
 	.tk-chat-icons {
 		background: $tk-first-color;
+		width: 80px;
+		flex-shrink: 0;
+		color: $white-color;
 	}
+
 	.tk-inbox {
 		background: $tk-second-color;
 		@include box-shadow($shadow);
+		width: 230px;
+		flex-shrink: 0;
+
 	}
 	.tk-user-list {
 		background: $tk-third-color;
 		@include box-shadow($shadow);
+		width: 371px;
+		flex-shrink: 0;
+
 	}
 	.tk-chat-wrapper {
 		background: $tk-fourth-color;
 		@include box-shadow($shadow);
+		width: auto;
+		flex-grow: 2;
+
 	}
 	.tk-contact-info {
 		background: $white-color;
+		width: 270px;
+		align-self: flex-end;
+		flex-shrink: 0;
+		color: $gray-light;
+	}
+
+	.tk-chat-menu {
+		height: $header-size;
+		line-height: $header-size;
+		text-align: center;
+		cursor: pointer;
+		@include font-size(18px);
 	}
 
 	.tk-inbox-header {
 		height: $header-size;
-		display: flex;
-		flex-flow: row nowrap;
 		color: $white-color;
+		line-height: $header-size;
 		h1 {
 			font-family: "ralewaybold", sans-serif;
 			@include font-size(22px);
-
 			margin-left: 25px;
+			display: inline-block;
+			float: left;
 		}
 
 		.tk-add-friend-button {
-
+			cursor: pointer;
+			border: 1px solid $white-color;
+			float: right;
+			margin: 25px;
+			&:hover {
+				background: $tk-hover-color;
+				border-color: darken($tk-hover-color, 9.2%);
+			}
 		}
 	}
 
@@ -97,8 +132,28 @@
 			color: $gray-light;
 			@include font-size(20px);
 		}
+	}
 
-		
+	.tk-profile-header {
+		  height: $header-size;
+		  line-height: $header-size;
+		  border-bottom: 1px solid $gray-profile-border;
+		  padding: 0 25px 0 0;
+
+		  .tk-profile-alert {
+		  	float:      left;
+		  	cursor:     pointer;
+		  	height:     100%;
+		  	width:      75px;
+		  	text-align: center;
+		  	&:hover {
+		  		color: $tk-blue;
+		  	}
+		  }
+
+		  .tk-profile-menu {
+		  	float: right;
+		  }
 	}
 }
 
