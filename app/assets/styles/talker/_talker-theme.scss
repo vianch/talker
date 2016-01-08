@@ -48,6 +48,11 @@
 			@include set-size(100%, $header-size, true);
 			background: $white-color;
 			align-self: flex-end;
+			display: flex;
+
+			.tk-chat-message {
+				float: left;
+			}
 		}
 
 	}
