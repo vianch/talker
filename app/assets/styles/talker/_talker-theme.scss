@@ -49,9 +49,39 @@
 			background: $white-color;
 			align-self: flex-end;
 			display: flex;
+			justify-content: space-between;
+
+			.tk-attach-to-message {
+				@include font-size(30px);
+				padding: 25px;
+				cursor: pointer;
+				color: $gray-light;
+			}
 
 			.tk-chat-message {
 				float: left;
+				width: 100%;
+				flex-grow: 2;
+				color: $gray;
+				@include font-size(13px);
+			}
+
+			.tk-send-button-wrapper {
+				float: right;
+				padding: 22px;
+				cursor: pointer;
+
+				&:hover {
+					.tk-send-chat-message {
+						background: $gray-dark;
+						color: $tk-green;
+					}
+				}
+			}
+
+			.tk-chat-emogi {
+				 @extend .tk-attach-to-message;
+				float: right;
 			}
 		}
 

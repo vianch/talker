@@ -282,8 +282,8 @@ webpackJsonp([1],[
 	  * https://github.com/paulmillr/es6-shim
 	  * @license es6-shim Copyright 2013-2015 by Paul Miller (http://paulmillr.com)
 	  *   and contributors,  MIT License
-	  * es6-shim: v0.34.0
-	  * see https://github.com/paulmillr/es6-shim/blob/0.34.0/LICENSE
+	  * es6-shim: v0.34.1
+	  * see https://github.com/paulmillr/es6-shim/blob/0.34.1/LICENSE
 	  * Details and documentation:
 	  * https://github.com/paulmillr/es6-shim/
 	  */
@@ -310,6 +310,7 @@ webpackJsonp([1],[
 	  var _apply = Function.call.bind(Function.apply);
 	  var _call = Function.call.bind(Function.call);
 	  var isArray = Array.isArray;
+	  var keys = Object.keys;
 	
 	  var not = function notThunker(func) {
 	    return function notThunk() { return !_apply(func, this, arguments); };
@@ -360,17 +361,17 @@ webpackJsonp([1],[
 	  // Define configurable, writable and non-enumerable props
 	  // if they don’t exist.
 	  var defineProperties = function (object, map, forceOverride) {
-	    _forEach(Object.keys(map), function (name) {
+	    _forEach(keys(map), function (name) {
 	      var method = map[name];
 	      defineProperty(object, name, method, !!forceOverride);
 	    });
 	  };
 	
 	  var _toString = Function.call.bind(Object.prototype.toString);
-	  var isCallable = function isCallable(x) {
-	    // some old browsers (IE, FF) say that typeof /abc/ === 'function'
+	  var isCallable =  false ? function IsCallableSlow(x) {
+	    // Some old browsers (IE, FF) say that typeof /abc/ === 'function'
 	    return typeof x === 'function' && _toString(x) === '[object Function]';
-	  };
+	  } : function IsCallableFast(x) { return typeof x === 'function'; };
 	
 	  var Value = {
 	    getter: function (object, name, getter) {
@@ -425,7 +426,7 @@ webpackJsonp([1],[
 	    Prototype.prototype = prototype;
 	    var object = new Prototype();
 	    if (typeof properties !== 'undefined') {
-	      Object.keys(properties).forEach(function (key) {
+	      keys(properties).forEach(function (key) {
 	        Value.defineByDescriptor(object, key, properties[key]);
 	      });
 	    }
@@ -565,11 +566,20 @@ webpackJsonp([1],[
 	      return x;
 	    },
 	
+	    // This might miss the "(non-standard exotic and does not implement
+	    // [[Call]])" case from
+	    // http://www.ecma-international.org/ecma-262/6.0/#sec-typeof-operator-runtime-semantics-evaluation
+	    // but we can't find any evidence these objects exist in practice.
+	    // If we find some in the future, you could test `Object(x) === x`,
+	    // which is reliable according to
+	    // http://www.ecma-international.org/ecma-262/6.0/#sec-toobject
+	    // but is not well optimized by runtimes and creates an object
+	    // whenever it returns false, and thus is very slow.
 	    TypeIsObject: function (x) {
-	      /* jshint eqnull:true */
-	      // this is expensive when it returns false; use this function
-	      // when you expect it to return true in the common case.
-	      return x != null && Object(x) === x;
+	      if (x === void 0 || x === null || x === true || x === false) {
+	        return false;
+	      }
+	      return typeof x === 'function' || typeof x === 'object';
 	    },
 	
 	    ToObject: function (o, optMessage) {
@@ -786,7 +796,7 @@ webpackJsonp([1],[
 	      var symbolSearch = defineWellKnownSymbol('search');
 	      var originalSearch = String.prototype.search;
 	      defineProperty(RegExp.prototype, symbolSearch, function search(string) {
-	        return ES.Call(originalSearch, string, [ES.ToString(this)]);
+	        return ES.Call(originalSearch, string, [this]);
 	      });
 	      var searchShim = function search(regexp) {
 	        var O = ES.RequireObjectCoercible(this);
@@ -1032,27 +1042,33 @@ webpackJsonp([1],[
 	    },
 	
 	    startsWith: function startsWith(searchString) {
-	      var thisStr = ES.ToString(ES.RequireObjectCoercible(this));
+	      var S = ES.ToString(ES.RequireObjectCoercible(this));
 	      if (ES.IsRegExp(searchString)) {
 	        throw new TypeError('Cannot call method "startsWith" with a regex');
 	      }
 	      var searchStr = ES.ToString(searchString);
-	      var startArg = arguments.length > 1 ? arguments[1] : void 0;
-	      var start = _max(ES.ToInteger(startArg), 0);
-	      return _strSlice(thisStr, start, start + searchStr.length) === searchStr;
+	      var position;
+	      if (arguments.length > 1) {
+	        position = arguments[1];
+	      }
+	      var start = _max(ES.ToInteger(position), 0);
+	      return _strSlice(S, start, start + searchStr.length) === searchStr;
 	    },
 	
 	    endsWith: function endsWith(searchString) {
-	      var thisStr = ES.ToString(ES.RequireObjectCoercible(this));
+	      var S = ES.ToString(ES.RequireObjectCoercible(this));
 	      if (ES.IsRegExp(searchString)) {
 	        throw new TypeError('Cannot call method "endsWith" with a regex');
 	      }
 	      var searchStr = ES.ToString(searchString);
-	      var thisLen = thisStr.length;
-	      var posArg = arguments.length > 1 ? arguments[1] : void 0;
-	      var pos = typeof posArg === 'undefined' ? thisLen : ES.ToInteger(posArg);
-	      var end = _min(_max(pos, 0), thisLen);
-	      return _strSlice(thisStr, end - searchStr.length, end) === searchStr;
+	      var len = S.length;
+	      var endPosition;
+	      if (arguments.length > 1) {
+	        endPosition = arguments[1];
+	      }
+	      var pos = typeof endPosition === 'undefined' ? len : ES.ToInteger(endPosition);
+	      var end = _min(_max(pos, 0), len);
+	      return _strSlice(S, end - searchStr.length, end) === searchStr;
 	    },
 	
 	    includes: function includes(searchString) {
@@ -1174,15 +1190,20 @@ webpackJsonp([1],[
 	  var ArrayShims = {
 	    from: function from(items) {
 	      var C = this;
-	      var mapFn = arguments.length > 1 ? arguments[1] : void 0;
+	      var mapFn;
+	      if (arguments.length > 1) {
+	        mapFn = arguments[1];
+	      }
 	      var mapping, T;
-	      if (mapFn === void 0) {
+	      if (typeof mapFn === 'undefined') {
 	        mapping = false;
 	      } else {
 	        if (!ES.IsCallable(mapFn)) {
 	          throw new TypeError('Array.from: when provided, the second argument must be a function');
 	        }
-	        T = arguments.length > 2 ? arguments[2] : void 0;
+	        if (arguments.length > 2) {
+	          T = arguments[2];
+	        }
 	        mapping = true;
 	      }
 	
@@ -1205,7 +1226,7 @@ webpackJsonp([1],[
 	          nextValue = next.value;
 	          try {
 	            if (mapping) {
-	              nextValue = T === undefined ? mapFn(nextValue, i) : _call(mapFn, T, nextValue, i);
+	              nextValue = typeof T === 'undefined' ? mapFn(nextValue, i) : _call(mapFn, T, nextValue, i);
 	            }
 	            result[i] = nextValue;
 	          } catch (e) {
@@ -1223,7 +1244,7 @@ webpackJsonp([1],[
 	        for (i = 0; i < length; ++i) {
 	          value = arrayLike[i];
 	          if (mapping) {
-	            value = T !== undefined ? _call(mapFn, T, value, i) : mapFn(value, i);
+	            value = typeof T === 'undefined' ? mapFn(value, i) : _call(mapFn, T, value, i);
 	          }
 	          result[i] = value;
 	        }
@@ -1372,16 +1393,19 @@ webpackJsonp([1],[
 	
 	  var ArrayPrototypeShims = {
 	    copyWithin: function copyWithin(target, start) {
-	      var end = arguments[2]; // copyWithin.length must be 2
 	      var o = ES.ToObject(this);
 	      var len = ES.ToLength(o.length);
 	      var relativeTarget = ES.ToInteger(target);
 	      var relativeStart = ES.ToInteger(start);
 	      var to = relativeTarget < 0 ? _max(len + relativeTarget, 0) : _min(relativeTarget, len);
 	      var from = relativeStart < 0 ? _max(len + relativeStart, 0) : _min(relativeStart, len);
-	      end = typeof end === 'undefined' ? len : ES.ToInteger(end);
-	      var fin = end < 0 ? _max(len + end, 0) : _min(end, len);
-	      var count = _min(fin - from, len - to);
+	      var end;
+	      if (arguments.length > 2) {
+	        end = arguments[2];
+	      }
+	      var relativeEnd = typeof end === 'undefined' ? len : ES.ToInteger(end);
+	      var finalItem = relativeEnd < 0 ? _max(len + relativeEnd, 0) : _min(relativeEnd, len);
+	      var count = _min(finalItem - from, len - to);
 	      var direction = 1;
 	      if (from < to && to < (from + count)) {
 	        direction = -1;
@@ -1402,8 +1426,14 @@ webpackJsonp([1],[
 	    },
 	
 	    fill: function fill(value) {
-	      var start = arguments.length > 1 ? arguments[1] : void 0;
-	      var end = arguments.length > 2 ? arguments[2] : void 0;
+	      var start;
+	      if (arguments.length > 1) {
+	        start = arguments[1];
+	      }
+	      var end;
+	      if (arguments.length > 2) {
+	        end = arguments[2];
+	      }
 	      var O = ES.ToObject(this);
 	      var len = ES.ToLength(O.length);
 	      start = ES.ToInteger(typeof start === 'undefined' ? 0 : start);
@@ -1514,12 +1544,12 @@ webpackJsonp([1],[
 	  var arrayFromHandlesUndefinedMapFunction = (function () {
 	    // Microsoft Edge v0.11 throws if the mapFn argument is *provided* but undefined,
 	    // but the spec doesn't care if it's provided or not - undefined doesn't throw.
-	    return valueOrFalseIfThrows(function () { return Array.from([0], undefined); });
+	    return valueOrFalseIfThrows(function () { return Array.from([0], void 0); });
 	  }());
 	  if (!arrayFromHandlesUndefinedMapFunction) {
 	    var origArrayFrom = Array.from;
 	    overrideNative(Array, 'from', function from(items) {
-	      if (arguments.length > 0 && typeof arguments[1] !== 'undefined') {
+	      if (arguments.length > 1 && typeof arguments[1] !== 'undefined') {
 	        return ES.Call(origArrayFrom, this, arguments);
 	      } else {
 	        return _call(origArrayFrom, this, items);
@@ -1719,12 +1749,12 @@ webpackJsonp([1],[
 	    };
 	  };
 	  var assignReducer = function (target, source) {
-	    var keys = Object.keys(Object(source));
+	    var sourceKeys = keys(Object(source));
 	    var symbols;
 	    if (ES.IsCallable(Object.getOwnPropertySymbols)) {
 	      symbols = _filter(Object.getOwnPropertySymbols(Object(source)), isEnumerableOn(source));
 	    }
-	    return _reduce(_concat(keys, symbols || []), assignTo(source), target);
+	    return _reduce(_concat(sourceKeys, symbols || []), assignTo(source), target);
 	  };
 	
 	  var ObjectShims = {
@@ -1839,6 +1869,7 @@ webpackJsonp([1],[
 	    overrideNative(Object, 'keys', function keys(value) {
 	      return originalObjectKeys(ES.ToObject(value));
 	    });
+	    keys = Object.keys;
 	  }
 	
 	  if (Object.getOwnPropertyNames) {
@@ -2027,7 +2058,7 @@ webpackJsonp([1],[
 	      leftContext: '$`',
 	      rightContext: '$\''
 	    };
-	    _forEach(Object.keys(regexGlobals), function (prop) {
+	    _forEach(keys(regexGlobals), function (prop) {
 	      if (prop in RegExp && !(regexGlobals[prop] in RegExp)) {
 	        Value.getter(RegExp, regexGlobals[prop], function get() {
 	          return RegExp[prop];
@@ -2313,6 +2344,9 @@ webpackJsonp([1],[
 	        capability.resolve = resolve;
 	        capability.reject = reject;
 	      };
+	      // Initialize fields to inform optimizers about the object shape.
+	      capability.resolve = void 0;
+	      capability.reject = void 0;
 	      capability.promise = new C(resolver);
 	      if (!(ES.IsCallable(capability.resolve) && ES.IsCallable(capability.reject))) {
 	        throw new TypeError('Bad promise constructor');
@@ -2349,14 +2383,15 @@ webpackJsonp([1],[
 	      // global Promise below (in order to workaround bugs)
 	      // https://github.com/Raynos/observ-hash/issues/2#issuecomment-35857671
 	      var P = globals.Promise;
-	      return P && P.resolve && function (task) {
-	        return P.resolve().then(task);
+	      var pr = P && P.resolve && P.resolve();
+	      return pr && function (task) {
+	        return pr.then(task);
 	      };
 	    };
 	    /*global process */
 	    /* jscs:disable disallowMultiLineTernary */
 	    var enqueue = ES.IsCallable(globals.setImmediate) ?
-	      globals.setImmediate.bind(globals) :
+	      globals.setImmediate :
 	      typeof process === 'object' && process.nextTick ? process.nextTick :
 	      makePromiseAsap() ||
 	      (ES.IsCallable(makeZeroTimeout) ? makeZeroTimeout() :
@@ -2364,59 +2399,99 @@ webpackJsonp([1],[
 	    /* jscs:enable disallowMultiLineTernary */
 	
 	    // Constants for Promise implementation
-	    var PROMISE_IDENTITY = 1;
-	    var PROMISE_THROWER = 2;
-	    var PROMISE_PENDING = 3;
-	    var PROMISE_FULFILLED = 4;
-	    var PROMISE_REJECTED = 5;
+	    var PROMISE_IDENTITY = function (x) { return x; };
+	    var PROMISE_THROWER = function (e) { throw e; };
+	    var PROMISE_PENDING = 0;
+	    var PROMISE_FULFILLED = 1;
+	    var PROMISE_REJECTED = 2;
+	    // We store fulfill/reject handlers and capabilities in a single array.
+	    var PROMISE_FULFILL_OFFSET = 0;
+	    var PROMISE_REJECT_OFFSET = 1;
+	    var PROMISE_CAPABILITY_OFFSET = 2;
+	    // This is used in an optimization for chaining promises via then.
+	    var PROMISE_FAKE_CAPABILITY = {};
 	
-	    var promiseReactionJob = function (reaction, argument) {
-	      var promiseCapability = reaction.capabilities;
-	      var handler = reaction.handler;
-	      var handlerResult, handlerException = false, f;
-	      if (handler === PROMISE_IDENTITY) {
-	        handlerResult = argument;
-	      } else if (handler === PROMISE_THROWER) {
-	        handlerResult = argument;
-	        handlerException = true;
-	      } else {
-	        try {
-	          handlerResult = handler(argument);
-	        } catch (e) {
-	          handlerResult = e;
-	          handlerException = true;
-	        }
-	      }
-	      f = handlerException ? promiseCapability.reject : promiseCapability.resolve;
-	      f(handlerResult);
+	    var enqueuePromiseReactionJob = function (handler, capability, argument) {
+	      enqueue(function () {
+	        promiseReactionJob(handler, capability, argument);
+	      });
 	    };
 	
-	    var triggerPromiseReactions = function (reactions, argument) {
-	      _forEach(reactions, function (reaction) {
-	        enqueue(function () {
-	          promiseReactionJob(reaction, argument);
-	        });
-	      });
+	    var promiseReactionJob = function (handler, promiseCapability, argument) {
+	      var handlerResult, f;
+	      if (promiseCapability === PROMISE_FAKE_CAPABILITY) {
+	        // Fast case, when we don't actually need to chain through to a
+	        // (real) promiseCapability.
+	        return handler(argument);
+	      }
+	      try {
+	        handlerResult = handler(argument);
+	        f = promiseCapability.resolve;
+	      } catch (e) {
+	        handlerResult = e;
+	        f = promiseCapability.reject;
+	      }
+	      f(handlerResult);
 	    };
 	
 	    var fulfillPromise = function (promise, value) {
 	      var _promise = promise._promise;
-	      var reactions = _promise.fulfillReactions;
+	      var length = _promise.reactionLength;
+	      if (length > 0) {
+	        enqueuePromiseReactionJob(
+	          _promise.fulfillReactionHandler0,
+	          _promise.reactionCapability0,
+	          value
+	        );
+	        _promise.fulfillReactionHandler0 = void 0;
+	        _promise.rejectReactions0 = void 0;
+	        _promise.reactionCapability0 = void 0;
+	        if (length > 1) {
+	          for (var i = 1, idx = 0; i < length; i++, idx += 3) {
+	            enqueuePromiseReactionJob(
+	              _promise[idx + PROMISE_FULFILL_OFFSET],
+	              _promise[idx + PROMISE_CAPABILITY_OFFSET],
+	              value
+	            );
+	            promise[idx + PROMISE_FULFILL_OFFSET] = void 0;
+	            promise[idx + PROMISE_REJECT_OFFSET] = void 0;
+	            promise[idx + PROMISE_CAPABILITY_OFFSET] = void 0;
+	          }
+	        }
+	      }
 	      _promise.result = value;
-	      _promise.fulfillReactions = void 0;
-	      _promise.rejectReactions = void 0;
 	      _promise.state = PROMISE_FULFILLED;
-	      triggerPromiseReactions(reactions, value);
+	      _promise.reactionLength = 0;
 	    };
 	
 	    var rejectPromise = function (promise, reason) {
 	      var _promise = promise._promise;
-	      var reactions = _promise.rejectReactions;
+	      var length = _promise.reactionLength;
+	      if (length > 0) {
+	        enqueuePromiseReactionJob(
+	          _promise.rejectReactionHandler0,
+	          _promise.reactionCapability0,
+	          reason
+	        );
+	        _promise.fulfillReactionHandler0 = void 0;
+	        _promise.rejectReactions0 = void 0;
+	        _promise.reactionCapability0 = void 0;
+	        if (length > 1) {
+	          for (var i = 1, idx = 0; i < length; i++, idx += 3) {
+	            enqueuePromiseReactionJob(
+	              _promise[idx + PROMISE_REJECT_OFFSET],
+	              _promise[idx + PROMISE_CAPABILITY_OFFSET],
+	              reason
+	            );
+	            promise[idx + PROMISE_FULFILL_OFFSET] = void 0;
+	            promise[idx + PROMISE_REJECT_OFFSET] = void 0;
+	            promise[idx + PROMISE_CAPABILITY_OFFSET] = void 0;
+	          }
+	        }
+	      }
 	      _promise.result = reason;
-	      _promise.fulfillReactions = void 0;
-	      _promise.rejectReactions = void 0;
 	      _promise.state = PROMISE_REJECTED;
-	      triggerPromiseReactions(reactions, reason);
+	      _promise.reactionLength = 0;
 	    };
 	
 	    var createResolvingFunctions = function (promise) {
@@ -2451,18 +2526,29 @@ webpackJsonp([1],[
 	      return { resolve: resolve, reject: reject };
 	    };
 	
+	    var optimizedThen = function (then, thenable, resolve, reject) {
+	      // Optimization: since we discard the result, we can pass our
+	      // own then implementation a special hint to let it know it
+	      // doesn't have to create it.  (The PROMISE_FAKE_CAPABILITY
+	      // object is local to this implementation and unforgeable outside.)
+	      if (then === Promise$prototype$then) {
+	        _call(then, thenable, resolve, reject, PROMISE_FAKE_CAPABILITY);
+	      } else {
+	        _call(then, thenable, resolve, reject);
+	      }
+	    };
 	    var promiseResolveThenableJob = function (promise, thenable, then) {
 	      var resolvingFunctions = createResolvingFunctions(promise);
 	      var resolve = resolvingFunctions.resolve;
 	      var reject = resolvingFunctions.reject;
 	      try {
-	        _call(then, thenable, resolve, reject);
+	        optimizedThen(then, thenable, resolve, reject);
 	      } catch (e) {
 	        reject(e);
 	      }
 	    };
 	
-	    var Promise$prototype;
+	    var Promise$prototype, Promise$prototype$then;
 	    var Promise = (function () {
 	      var PromiseShim = function Promise(resolver) {
 	        if (!(this instanceof PromiseShim)) {
@@ -2479,8 +2565,15 @@ webpackJsonp([1],[
 	          _promise: {
 	            result: void 0,
 	            state: PROMISE_PENDING,
-	            fulfillReactions: [],
-	            rejectReactions: []
+	            // The first member of the "reactions" array is inlined here,
+	            // since most promises only have one reaction.
+	            // We've also exploded the 'reaction' object to inline the
+	            // "handler" and "capability" fields, since both fulfill and
+	            // reject reactions share the same capability.
+	            reactionLength: 0,
+	            fulfillReactionHandler0: void 0,
+	            rejectReactionHandler0: void 0,
+	            reactionCapability0: void 0
 	          }
 	        });
 	        var resolvingFunctions = createResolvingFunctions(promise);
@@ -2531,7 +2624,7 @@ webpackJsonp([1],[
 	          index, values, resultCapability, remaining
 	        );
 	        remaining.count += 1;
-	        nextPromise.then(resolveElement, resultCapability.reject);
+	        optimizedThen(nextPromise.then, nextPromise, resolveElement, resultCapability.reject);
 	        index += 1;
 	      }
 	      if ((--remaining.count) === 0) {
@@ -2560,7 +2653,7 @@ webpackJsonp([1],[
 	          throw e;
 	        }
 	        nextPromise = C.resolve(nextValue);
-	        nextPromise.then(resultCapability.resolve, resultCapability.reject);
+	        optimizedThen(nextPromise.then, nextPromise, resultCapability.resolve, resultCapability.reject);
 	      }
 	      return resultCapability.promise;
 	    };
@@ -2648,44 +2741,60 @@ webpackJsonp([1],[
 	
 	    defineProperties(Promise$prototype, {
 	      'catch': function (onRejected) {
-	        return this.then(void 0, onRejected);
+	        return this.then(null, onRejected);
 	      },
 	
 	      then: function then(onFulfilled, onRejected) {
 	        var promise = this;
 	        if (!ES.IsPromise(promise)) { throw new TypeError('not a promise'); }
 	        var C = ES.SpeciesConstructor(promise, Promise);
-	        var resultCapability = new PromiseCapability(C);
+	        var resultCapability;
+	        var returnValueIsIgnored = arguments.length > 2 && arguments[2] === PROMISE_FAKE_CAPABILITY;
+	        if (returnValueIsIgnored && C === Promise) {
+	          resultCapability = PROMISE_FAKE_CAPABILITY;
+	        } else {
+	          resultCapability = new PromiseCapability(C);
+	        }
 	        // PerformPromiseThen(promise, onFulfilled, onRejected, resultCapability)
-	        var fulfillReaction = {
-	          capabilities: resultCapability,
-	          handler: ES.IsCallable(onFulfilled) ? onFulfilled : PROMISE_IDENTITY
-	        };
-	        var rejectReaction = {
-	          capabilities: resultCapability,
-	          handler: ES.IsCallable(onRejected) ? onRejected : PROMISE_THROWER
-	        };
+	        // Note that we've split the 'reaction' object into its two
+	        // components, "capabilities" and "handler"
+	        // "capabilities" is always equal to `resultCapability`
+	        var fulfillReactionHandler = ES.IsCallable(onFulfilled) ? onFulfilled : PROMISE_IDENTITY;
+	        var rejectReactionHandler = ES.IsCallable(onRejected) ? onRejected : PROMISE_THROWER;
 	        var _promise = promise._promise;
 	        var value;
 	        if (_promise.state === PROMISE_PENDING) {
-	          _push(_promise.fulfillReactions, fulfillReaction);
-	          _push(_promise.rejectReactions, rejectReaction);
+	          if (_promise.reactionLength === 0) {
+	            _promise.fulfillReactionHandler0 = fulfillReactionHandler;
+	            _promise.rejectReactionHandler0 = rejectReactionHandler;
+	            _promise.reactionCapability0 = resultCapability;
+	          } else {
+	            var idx = 3 * (_promise.reactionLength - 1);
+	            _promise[idx + PROMISE_FULFILL_OFFSET] = fulfillReactionHandler;
+	            _promise[idx + PROMISE_REJECT_OFFSET] = rejectReactionHandler;
+	            _promise[idx + PROMISE_CAPABILITY_OFFSET] = resultCapability;
+	          }
+	          _promise.reactionLength += 1;
 	        } else if (_promise.state === PROMISE_FULFILLED) {
 	          value = _promise.result;
-	          enqueue(function () {
-	            promiseReactionJob(fulfillReaction, value);
-	          });
+	          enqueuePromiseReactionJob(
+	            fulfillReactionHandler, resultCapability, value
+	          );
 	        } else if (_promise.state === PROMISE_REJECTED) {
 	          value = _promise.result;
-	          enqueue(function () {
-	            promiseReactionJob(rejectReaction, value);
-	          });
+	          enqueuePromiseReactionJob(
+	            rejectReactionHandler, resultCapability, value
+	          );
 	        } else {
 	          throw new TypeError('unexpected Promise state');
 	        }
 	        return resultCapability.promise;
 	      }
 	    });
+	    // This helps the optimizer by ensuring that methods which take
+	    // capabilities aren't polymorphic.
+	    PROMISE_FAKE_CAPABILITY = new PromiseCapability(Promise);
+	    Promise$prototype$then = Promise$prototype.then;
 	
 	    return Promise;
 	  }());
@@ -2751,6 +2860,30 @@ webpackJsonp([1],[
 	      /*globals Promise: false */
 	      overrideNative(globals, 'Promise', PromiseShim);
 	    }
+	    if (Promise.all.length !== 1) {
+	      var origAll = Promise.all;
+	      overrideNative(Promise, 'all', function all(iterable) {
+	        return ES.Call(origAll, this, arguments);
+	      });
+	    }
+	    if (Promise.race.length !== 1) {
+	      var origRace = Promise.race;
+	      overrideNative(Promise, 'race', function race(iterable) {
+	        return ES.Call(origRace, this, arguments);
+	      });
+	    }
+	    if (Promise.resolve.length !== 1) {
+	      var origResolve = Promise.resolve;
+	      overrideNative(Promise, 'resolve', function resolve(x) {
+	        return ES.Call(origResolve, this, arguments);
+	      });
+	    }
+	    if (Promise.reject.length !== 1) {
+	      var origReject = Promise.reject;
+	      overrideNative(Promise, 'reject', function reject(r) {
+	        return ES.Call(origReject, this, arguments);
+	      });
+	    }
 	    ensureEnumerable(Promise, 'all');
 	    ensureEnumerable(Promise, 'race');
 	    ensureEnumerable(Promise, 'resolve');
@@ -2762,7 +2895,7 @@ webpackJsonp([1],[
 	  // Their fast path also requires that the environment preserve
 	  // property insertion order, which is not guaranteed by the spec.
 	  var testOrder = function (a) {
-	    var b = Object.keys(_reduce(a, function (o, k) {
+	    var b = keys(_reduce(a, function (o, k) {
 	      o[k] = true;
 	      return o;
 	    }, {}));
@@ -3150,36 +3283,42 @@ webpackJsonp([1],[
 	        };
 	        Set$prototype = SetShim.prototype;
 	
+	        var decodeKey = function (key) {
+	          var k = key;
+	          if (k === '^null') {
+	            return null;
+	          } else if (k === '^undefined') {
+	            return void 0;
+	          } else {
+	            var first = k.charAt(0);
+	            if (first === '$') {
+	              return _strSlice(k, 1);
+	            } else if (first === 'n') {
+	              return +_strSlice(k, 1);
+	            } else if (first === 'b') {
+	              return k === 'btrue';
+	            }
+	          }
+	          return +k;
+	        };
 	        // Switch from the object backing storage to a full Map.
 	        var ensureMap = function ensureMap(set) {
 	          if (!set['[[SetData]]']) {
 	            var m = set['[[SetData]]'] = new collectionShims.Map();
-	            _forEach(Object.keys(set._storage), function (key) {
-	              var k = key;
-	              if (k === '^null') {
-	                k = null;
-	              } else if (k === '^undefined') {
-	                k = void 0;
-	              } else {
-	                var first = k.charAt(0);
-	                if (first === '$') {
-	                  k = _strSlice(k, 1);
-	                } else if (first === 'n') {
-	                  k = +_strSlice(k, 1);
-	                } else if (first === 'b') {
-	                  k = k === 'btrue';
-	                } else {
-	                  k = +k;
-	                }
-	              }
+	            _forEach(keys(set._storage), function (key) {
+	              var k = decodeKey(key);
 	              m.set(k, k);
 	            });
-	            set._storage = null; // free old backing storage
+	            set['[[SetData]]'] = m;
 	          }
+	          set._storage = null; // free old backing storage
 	        };
 	
 	        Value.getter(SetShim.prototype, 'size', function () {
 	          requireSetSlot(this, 'size');
+	          if (this._storage) {
+	            return keys(this._storage).length;
+	          }
 	          ensureMap(this);
 	          return this['[[SetData]]'].size;
 	        });
@@ -3222,7 +3361,8 @@ webpackJsonp([1],[
 	            requireSetSlot(this, 'clear');
 	            if (this._storage) {
 	              this._storage = emptyObject();
-	            } else {
+	            }
+	            if (this['[[SetData]]']) {
 	              this['[[SetData]]'].clear();
 	            }
 	          },
@@ -3474,7 +3614,7 @@ webpackJsonp([1],[
 	      if (!ES.IsConstructor(constructor)) {
 	        throw new TypeError('First argument must be a constructor.');
 	      }
-	      var newTarget = arguments.length < 3 ? constructor : arguments[2];
+	      var newTarget = arguments.length > 2 ? arguments[2] : constructor;
 	      if (!ES.IsConstructor(newTarget)) {
 	        throw new TypeError('new.target must be a constructor.');
 	      }
@@ -3557,7 +3697,7 @@ webpackJsonp([1],[
 	        var parent = Object.getPrototypeOf(target);
 	
 	        if (parent === null) {
-	          return undefined;
+	          return void 0;
 	        }
 	
 	        return internalGet(parent, key, receiver);
@@ -3571,7 +3711,7 @@ webpackJsonp([1],[
 	        return ES.Call(desc.get, receiver);
 	      }
 	
-	      return undefined;
+	      return void 0;
 	    };
 	
 	    var internalSet = function set(target, key, value, receiver) {
